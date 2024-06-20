@@ -38,11 +38,18 @@ import update.UpdateChecker;
 
 public class AntiFarmPlugin extends JavaPlugin implements Listener {
 
+	private static AntiFarmPlugin instance;
+
+	public static AntiFarmPlugin getInstance() {
+		return instance;
+	}
+
 	private Configuration config;
 	private Configuration spawners;
 
 	@Override
 	public void onEnable() {
+		instance = this;
 
 		config = new Configuration("config", this);
 		spawners = new Configuration("spawners", this);
