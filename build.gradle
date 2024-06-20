@@ -1,0 +1,56 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.1.1'
+}
+
+group = 'fr.wynbox.antifarm'
+version = '1.7.18'
+def jarName = 'AntiFarm'
+
+compileJava.options.encoding = 'UTF-8'
+
+repositories {
+    mavenCentral()
+    maven { url uri("https://repo.papermc.io/repository/maven-public/") } // Paper
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+}
+
+jar {
+    setArchiveClassifier('original')
+}
+
+shadowJar {
+    setArchiveClassifier('')
+    setArchiveBaseName(jarName)
+    destinationDirectory.set(file("out"))
+}
+
+dependencies {
+    compileOnly fileTree('lib') {
+        include '*.jar'
+    }
+    compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
+}
+
+
+
+tasks.register('devJar', Copy) {
+    from layout.projectDirectory.dir('out')
+    include '*.jar'
+    into file('../server/plugins')
+}
+
+tasks.named("build").get().dependsOn(shadowJar)
+tasks.named("devJar").get().dependsOn(shadowJar)
