@@ -1,5 +1,8 @@
 package antifarm;
 
+import config.AntiFarmConfigurations;
+import config.global.dispenser.AntiDispenserConfig;
+import config.global.settings.SettingsConfig;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.type.Dispenser;
@@ -10,29 +13,21 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockShearEntityEvent;
 
-import configuration.Configuration;
-import core.AntiFarmPlugin;
-
 public class AntiDispenser implements Listener {
-
-	private final Configuration config;
-
-	public AntiDispenser(AntiFarmPlugin plugin) {
-		this.config = plugin.getConfig();
-	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onDispense(BlockDispenseEvent event) {
 
-		if (config.getStringList("settings.disabled-worlds").contains(event.getBlock().getWorld().getName())) return;
+		if (SettingsConfig.getInstance().getDisabledWorlds().contains(event.getBlock().getWorld())) return;
 
-		if (event.isCancelled() || event.getBlock() == null || event.getItem() == null || event.getVelocity() == null || !event.getBlock().getType().equals(Material.DISPENSER)) return;
-		if (!config.getBoolean("anti-dispenser.enable") || !config.getStringList("anti-dispenser.blocked-item-list").contains(event.getItem().getType().toString().toUpperCase())) return;
+		if (event.isCancelled() || !event.getBlock().getType().equals(Material.DISPENSER)) return;
+		if (!AntiDispenserConfig.getInstance().isEnable() || !AntiDispenserConfig.getInstance().getBlockedItems().contains(event.getItem().getType()))
+			return;
 
 		Dispenser dispenser = (Dispenser) event.getBlock().getBlockData();
 		Block block = event.getBlock().getRelative(dispenser.getFacing());
 
-		if (!config.getStringList("farm-blocks").contains(block.getType().toString().toUpperCase())) return;
+		if (!AntiFarmConfigurations.GLOBAL.getFarmBlocks().contains(block.getType())) return;
 
 		event.setCancelled(true);
 
@@ -41,10 +36,11 @@ public class AntiDispenser implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onBlockShearEntity(BlockShearEntityEvent event) {
 
-		if (config.getStringList("settings.disabled-worlds").contains(event.getBlock().getWorld().getName())) return;
+		if (SettingsConfig.getInstance().getDisabledWorlds().contains(event.getBlock().getWorld())) return;
 
-		if (event.isCancelled() || event.getEntity() == null || !event.getEntity().getType().equals(EntityType.SHEEP)) return;
-		if (!config.getBoolean("anti-dispenser.enable") || !config.getBoolean("anti-dispenser.prevent-shearing", true)) return;
+		if (event.isCancelled() || !event.getEntity().getType().equals(EntityType.SHEEP)) return;
+		if (!AntiDispenserConfig.getInstance().isEnable() || !AntiDispenserConfig.getInstance().isPreventDispenserShearing())
+			return;
 
 		event.setCancelled(true);
 

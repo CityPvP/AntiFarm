@@ -1,9 +1,15 @@
 package config.global.mobspawner;
 
+import config.AntiFarmConfigurations;
 import fr.bramsou.yaml.api.configuration.dynamic.ConfigurationPart;
 import fr.bramsou.yaml.api.configuration.dynamic.annotation.ConfigurationPath;
+import fr.bramsou.yaml.api.configuration.dynamic.annotation.ConfigurationReplacement;
 
 public class MobSpawnerSettingsConfig extends ConfigurationPart {
+
+    @ConfigurationPath(value = "player-warn-message", comments = "Warning message to player.")
+    @ConfigurationReplacement
+    private String playerWarnMessage = "&cYou can't break mob spawner, this action blocked on server!";
 
     @ConfigurationPath(value = "prevent-spawn", comments = "Prevent mob spawner from spawning creatures.")
     private boolean preventSpawn = false;
@@ -11,12 +17,16 @@ public class MobSpawnerSettingsConfig extends ConfigurationPart {
     private boolean preventBreak = true;
     @ConfigurationPath(value = "prevent-transformation", comments = "Preventing mob spawners from being converted by clicking with mob eggs.")
     private boolean preventTransformation = true;
-    @ConfigurationPath(value = "player-warn-message", comments = "Warning message to player.")
-    private String playerWarnMessage = "&cYou can't break mob spawner, this action blocked on server!";
     @ConfigurationPath(value = "admin-warn-message", comments = "Warning message to admin.")
+    @ConfigurationReplacement
     private String adminWarnMessage = "&cMob spawner break is disabled on server. But you are an admin and if you want to break, you can. (Sneak + Attack)";
     @ConfigurationPath(value = "transformation-warn-message", comments = "Transformation blocking message to admin.")
+    @ConfigurationReplacement
     private String transformationWarnMessage = "&cYou can't convert mob spawner, this action is blocked on server!";
+
+    public static MobSpawnerSettingsConfig getInstance() {
+        return AntiFarmConfigurations.GLOBAL.getMobSpawnerSettings();
+    }
     @ConfigurationPath(value = "spawner-data", comments = "Spawner data customization. (Spawner settings are in spawners.yml)")
     private boolean spawnerData = false;
 

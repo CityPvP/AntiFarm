@@ -1,9 +1,14 @@
 package config.global.creaturelimiter.creatures;
 
+import config.global.creaturelimiter.CreatureProductLimiterConfig;
 import fr.bramsou.yaml.api.configuration.dynamic.ConfigurationPart;
 import fr.bramsou.yaml.api.configuration.dynamic.annotation.ConfigurationPath;
 
 public class FrogConfig extends ConfigurationPart {
+
+    public static FrogConfig getInstance() {
+        return CreatureProductLimiterConfig.getInstance().getFrog();
+    }
 
     @ConfigurationPath(value = "enable", comments = "")
     private boolean enable = true;

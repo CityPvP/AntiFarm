@@ -1,9 +1,7 @@
 package antifarm;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-
+import config.global.fishing.AntiFishingConfig;
+import config.global.settings.SettingsConfig;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,16 +10,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerFishEvent.State;
 
-import configuration.Configuration;
-import core.AntiFarmPlugin;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 
 public class AntiFishFarm implements Listener {
-
-	private final Configuration config;
-
-	public AntiFishFarm(AntiFarmPlugin plugin) {
-		this.config = plugin.getConfig();
-	}
 
 	private HashMap<String, Integer> fishCount = new HashMap<String, Integer>();
 	private HashMap<String, LocalDateTime> fishTime = new HashMap<String, LocalDateTime>();
@@ -30,10 +23,10 @@ public class AntiFishFarm implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onPlayerFish(PlayerFishEvent event) {
 
-		if (config.getStringList("settings.disabled-worlds").contains(event.getPlayer().getWorld().getName())) return;
+		if (SettingsConfig.getInstance().getDisabledWorlds().contains(event.getPlayer().getWorld())) return;
 
-		if (event.isCancelled() || event.getPlayer() == null || event.getState() == null) return;
-		if (!config.getBoolean("anti-fishing.enable", true)) return;
+		if (event.isCancelled()) return;
+		if (!AntiFishingConfig.getInstance().isEnable()) return;
 
 		if (clearHashMapsTimer == null) {
 			clearHashMapsTimer = LocalDateTime.now();
@@ -48,7 +41,7 @@ public class AntiFishFarm implements Listener {
 		String key = player.getName() + "." + String.valueOf(chunk.getX()) + "." + String.valueOf(chunk.getZ());
 
 		if (fishTime.get(key) != null) {
-			if (Duration.between(fishTime.get(key), LocalDateTime.now()).toSeconds() >= config.getInt("anti-fishing.chunk-cooldown", 600)) {
+			if (Duration.between(fishTime.get(key), LocalDateTime.now()).toSeconds() >= AntiFishingConfig.getInstance().getChunkCooldown()) {
 				fishCount.remove(key);
 				fishTime.remove(key);
 			}
@@ -67,19 +60,19 @@ public class AntiFishFarm implements Listener {
 			fishCount.replace(key, value, value + 1);
 		}
 
-		if (value >= config.getInt("anti-fishing.caught-fish-per-chunk", 10)) {
+		if (value >= AntiFishingConfig.getInstance().getCaughtFishPerChunk()) {
 
 			event.setCancelled(true);
 			fishCount.replace(key, fishCount.get(key), value + 1);
 
-			if (config.getBoolean("anti-fishing.warn", true)) {
-				player.sendMessage(config.getString("settings.prefix").replaceAll("&", "§") + config.getString("anti-fishing.warn-msg").replaceAll("&", "§"));
+			if (AntiFishingConfig.getInstance().isWarn()) {
+				player.sendMessage(SettingsConfig.getInstance().getPrefix() + AntiFishingConfig.getInstance().getWarnMsg());
 			}
 
-			if (config.getBoolean("anti-fishing.kick", false)) {
-				if (value >= (config.getInt("anti-fishing.caught-fish-per-chunk", 10) + 10)) {
-					player.kickPlayer(config.getString("settings.prefix").replaceAll("&", "§") + config.getString("anti-fishing.kick-msg").replaceAll("&", "§"));
-					fishCount.replace(key, fishCount.get(key), config.getInt("anti-fishing.caught-fish-per-chunk", 10));
+			if (AntiFishingConfig.getInstance().isKick()) {
+				if (value >= (AntiFishingConfig.getInstance().getCaughtFishPerChunk() + 10)) {
+					player.kickPlayer(SettingsConfig.getInstance().getPrefix() + AntiFishingConfig.getInstance().getKickMsg());
+					fishCount.replace(key, fishCount.get(key), AntiFishingConfig.getInstance().getCaughtFishPerChunk());
 				}
 			}
 

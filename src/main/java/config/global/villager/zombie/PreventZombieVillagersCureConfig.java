@@ -1,9 +1,14 @@
 package config.global.villager.zombie;
 
+import config.global.villager.VillagerSettingsConfig;
 import fr.bramsou.yaml.api.configuration.dynamic.ConfigurationPart;
 import fr.bramsou.yaml.api.configuration.dynamic.annotation.ConfigurationPath;
 
 public class PreventZombieVillagersCureConfig extends ConfigurationPart {
+
+    public static PreventZombieVillagersCureConfig getInstance() {
+        return VillagerSettingsConfig.getInstance().getPreventZombieVillagersCure();
+    }
 
     @ConfigurationPath(value = "enable", comments = "Enable/Disable option.")
     private boolean enable = true;

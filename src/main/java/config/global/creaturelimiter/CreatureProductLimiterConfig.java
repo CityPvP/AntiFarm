@@ -1,5 +1,6 @@
 package config.global.creaturelimiter;
 
+import config.AntiFarmConfigurations;
 import config.global.creaturelimiter.creatures.ChickenConfig;
 import config.global.creaturelimiter.creatures.CowConfig;
 import config.global.creaturelimiter.creatures.FrogConfig;
@@ -8,12 +9,16 @@ import fr.bramsou.yaml.api.configuration.dynamic.annotation.ConfigurationPath;
 
 public class CreatureProductLimiterConfig extends ConfigurationPart {
 
+    public static CreatureProductLimiterConfig getInstance() {
+        return AntiFarmConfigurations.GLOBAL.getCreatureProductLimiter();
+    }
+
     @ConfigurationPath(value = "frog", comments = "")
     private FrogConfig frog = new FrogConfig();
-    
+
     @ConfigurationPath(value = "chicken", comments = "")
     private ChickenConfig chicken = new ChickenConfig();
-    
+
     @ConfigurationPath(value = "cow", comments = "")
     private CowConfig cow = new CowConfig();
 

@@ -47,7 +47,6 @@ dependencies {
 }
 
 
-
 tasks.register('devJar', Copy) {
     from layout.projectDirectory.dir('out')
     include '*.jar'

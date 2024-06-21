@@ -1,19 +1,11 @@
 package antifarm;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.TimeZone;
-
+import config.global.mobfarms.PreventMobFarmsConfig;
+import config.global.settings.SettingsConfig;
+import core.AntiFarmPlugin;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.ChestedHorse;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
-import org.bukkit.entity.Villager;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -23,57 +15,66 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.persistence.PersistentDataType;
 
-import configuration.Configuration;
-import core.AntiFarmPlugin;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class AntiMobFarm implements Listener {
 
 	private final AntiFarmPlugin plugin;
-	private final Configuration config;
 
 	public AntiMobFarm(AntiFarmPlugin plugin) {
 		this.plugin = plugin;
-		this.config = plugin.getConfig();
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onEntityDeath(EntityDeathEvent event) {
 
-		if (config.getStringList("settings.disabled-worlds").contains(event.getEntity().getWorld().getName())) return;
+		if (SettingsConfig.getInstance().getDisabledWorlds().contains(event.getEntity().getWorld())) return;
 
-		if (event.getEntity().getLastDamageCause() == null || event.getEntity() instanceof Player || event.getEntity() instanceof ArmorStand || event.getEntity() instanceof Villager || event.getEntity() instanceof ChestedHorse) return;
+		if (event.getEntity().getLastDamageCause() == null || event.getEntity() instanceof Player || event.getEntity() instanceof ArmorStand || event.getEntity() instanceof Villager || event.getEntity() instanceof ChestedHorse)
+			return;
 
-		if (!config.getBoolean("prevent-mob-farms.enable", true)) return;
-		if (event.getEntity().getLastDamageCause().getCause().equals(DamageCause.CUSTOM) && config.getBoolean("prevent-mob-farms.allow-custom-death-drops", false)) return;
-		if (config.getBoolean("prevent-mob-farms.blacklist", true) && !config.getStringList("prevent-mob-farms.moblist").contains(event.getEntity().getType().toString().toUpperCase())) return;
-		if (!config.getBoolean("prevent-mob-farms.blacklist", true) && config.getStringList("prevent-mob-farms.moblist").contains(event.getEntity().getType().toString().toUpperCase())) return;
+		if (!PreventMobFarmsConfig.getInstance().isEnable()) return;
+		if (event.getEntity().getLastDamageCause().getCause().equals(DamageCause.CUSTOM) && PreventMobFarmsConfig.getInstance().isAllowCustomDeathDrops())
+			return;
+		if (PreventMobFarmsConfig.getInstance().isBlacklist() && !PreventMobFarmsConfig.getInstance().getMobs().contains(event.getEntity().getType()))
+			return;
+		if (!PreventMobFarmsConfig.getInstance().isBlacklist() && PreventMobFarmsConfig.getInstance().getMobs().contains(event.getEntity().getType()))
+			return;
 
 		double damageTaken = event.getEntity().getPersistentDataContainer().getOrDefault(new NamespacedKey(plugin, "damageTaken"), PersistentDataType.DOUBLE, 0.0);
 		double maxHealth = event.getEntity().getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
-		double damagePercentage = config.getDouble("prevent-mob-farms.required-damage-percent-for-loot") / 100;
+		double damagePercentage = PreventMobFarmsConfig.getInstance().getRequiredDamagePercentForLoot() / 100D;
 		if ((maxHealth * damagePercentage) <= damageTaken) return;
 
-		if (config.getBoolean("prevent-mob-farms.block-drop-xp", true)) event.setDroppedExp(0);
-		if (config.getBoolean("prevent-mob-farms.block-drop-item", true)) event.getDrops().clear();
+		if (PreventMobFarmsConfig.getInstance().isBlockDropXp()) event.setDroppedExp(0);
+		if (PreventMobFarmsConfig.getInstance().isBlockDropItem()) event.getDrops().clear();
 
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onDamage(EntityDamageEvent event) {
 
-		if (config.getStringList("settings.disabled-worlds").contains(event.getEntity().getWorld().getName())) return;
+		if (SettingsConfig.getInstance().getDisabledWorlds().contains(event.getEntity().getWorld())) return;
 
-		if (event.isCancelled() || event.getCause() == null || event.getEntity() instanceof Player || event.getEntity() instanceof ArmorStand || event.getEntity() instanceof Villager || event.getEntity() instanceof ChestedHorse) return;
+		if (event.isCancelled() || event.getEntity() instanceof Player || event.getEntity() instanceof ArmorStand || event.getEntity() instanceof Villager || event.getEntity() instanceof ChestedHorse)
+			return;
 
-		if (!event.getCause().equals(DamageCause.ENTITY_ATTACK) && !event.getCause().equals(DamageCause.PROJECTILE) && !event.getCause().equals(DamageCause.FIRE_TICK)) return;
+		if (!event.getCause().equals(DamageCause.ENTITY_ATTACK) && !event.getCause().equals(DamageCause.PROJECTILE) && !event.getCause().equals(DamageCause.FIRE_TICK))
+			return;
 
-		if (!config.getBoolean("prevent-mob-farms.enable", true)) return;
-		if (config.getBoolean("prevent-mob-farms.blacklist", true) && !config.getStringList("prevent-mob-farms.moblist").contains(event.getEntity().getType().toString().toUpperCase())) return;
-		if (!config.getBoolean("prevent-mob-farms.blacklist", true) && config.getStringList("prevent-mob-farms.moblist").contains(event.getEntity().getType().toString().toUpperCase())) return;
+		if (!PreventMobFarmsConfig.getInstance().isEnable()) return;
+		if (PreventMobFarmsConfig.getInstance().isBlacklist() && !PreventMobFarmsConfig.getInstance().getMobs().contains(event.getEntity().getType()))
+			return;
+		if (!PreventMobFarmsConfig.getInstance().isBlacklist() && PreventMobFarmsConfig.getInstance().getMobs().contains(event.getEntity().getType()))
+			return;
 
 		Player player = null;
 		Entity entity = event.getEntity();
-		Double eventDamage = event.getFinalDamage();
+		double eventDamage = event.getFinalDamage();
 
 		if (event.getCause().equals(DamageCause.PROJECTILE)) {
 			Projectile projectile = (Projectile) ((EntityDamageByEntityEvent) event).getDamager();

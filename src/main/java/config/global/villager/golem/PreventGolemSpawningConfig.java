@@ -1,9 +1,14 @@
 package config.global.villager.golem;
 
+import config.global.villager.VillagerSettingsConfig;
 import fr.bramsou.yaml.api.configuration.dynamic.ConfigurationPart;
 import fr.bramsou.yaml.api.configuration.dynamic.annotation.ConfigurationPath;
 
 public class PreventGolemSpawningConfig extends ConfigurationPart {
+
+    public static PreventGolemSpawningConfig getInstance() {
+        return VillagerSettingsConfig.getInstance().getPreventGolemSpawning();
+    }
 
     @ConfigurationPath(value = "village-defense", comments = "Prevents iron golem spawning when villager is scared or attacked.")
     private boolean villageDefense = false;

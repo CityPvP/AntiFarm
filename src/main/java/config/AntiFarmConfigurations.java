@@ -5,11 +5,11 @@ import config.spawners.SpawnersConfig;
 
 public interface AntiFarmConfigurations {
 
+    GlobalConfig GLOBAL = new GlobalConfig();
+    SpawnersConfig SPAWNERS = new SpawnersConfig();
+
     static void reload() {
         GLOBAL.reload();
         SPAWNERS.reload();
     }
-
-    GlobalConfig GLOBAL = new GlobalConfig();
-    SpawnersConfig SPAWNERS = new SpawnersConfig();
 }

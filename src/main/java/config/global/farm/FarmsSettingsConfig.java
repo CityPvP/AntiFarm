@@ -1,9 +1,14 @@
 package config.global.farm;
 
+import config.AntiFarmConfigurations;
 import fr.bramsou.yaml.api.configuration.dynamic.ConfigurationPart;
 import fr.bramsou.yaml.api.configuration.dynamic.annotation.ConfigurationPath;
 
 public class FarmsSettingsConfig extends ConfigurationPart {
+
+    public static FarmsSettingsConfig getInstance() {
+        return AntiFarmConfigurations.GLOBAL.getFarmsSettings();
+    }
 
     @ConfigurationPath(value = "prevent-cactus-farms", comments = "Prevents farming by placing a block next to the cactus.")
     private boolean preventCactusFarms = true;

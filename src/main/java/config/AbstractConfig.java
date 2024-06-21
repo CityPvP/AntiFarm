@@ -18,7 +18,10 @@ public abstract class AbstractConfig {
     public final void reload() {
         this.configuration.load();
         this.configuration.save();
+        this.loaded();
     }
+
+    public abstract void loaded();
 
     public abstract String name();
 }

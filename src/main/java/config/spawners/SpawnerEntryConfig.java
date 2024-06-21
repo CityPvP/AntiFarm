@@ -52,4 +52,8 @@ public class SpawnerEntryConfig extends ConfigurationPart {
     public int getSpawnRange() {
         return spawnRange;
     }
+
+    public String getKey() {
+        return key;
+    }
 }

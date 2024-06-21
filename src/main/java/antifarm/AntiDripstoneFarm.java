@@ -1,5 +1,7 @@
 package antifarm;
 
+import config.global.farm.FarmsSettingsConfig;
+import config.global.settings.SettingsConfig;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -9,23 +11,15 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPhysicsEvent;
 
-import configuration.Configuration;
-import core.AntiFarmPlugin;
-
 public class AntiDripstoneFarm implements Listener {
-
-	private final Configuration config;
-
-	public AntiDripstoneFarm(AntiFarmPlugin plugin) {
-		this.config = plugin.getConfig();
-	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onBlockPhysics(BlockPhysicsEvent event) {
 
-		if (config.getStringList("settings.disabled-worlds").contains(event.getBlock().getWorld().getName())) return;
+		if (SettingsConfig.getInstance().getDisabledWorlds().contains(event.getBlock().getWorld())) return;
 
-		if (event.isCancelled() || event.getBlock() == null || !event.getBlock().getType().equals(Material.POINTED_DRIPSTONE) || !config.getBoolean("farms-settings.prevent-dripstone-farms", true)) return;
+		if (event.isCancelled() || !event.getBlock().getType().equals(Material.POINTED_DRIPSTONE) || !FarmsSettingsConfig.getInstance().isPreventDripstoneFarms())
+			return;
 
 		Block block = event.getBlock();
 		PointedDripstone dripstone = (PointedDripstone) block.getBlockData();

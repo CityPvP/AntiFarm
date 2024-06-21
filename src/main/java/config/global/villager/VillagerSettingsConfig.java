@@ -1,5 +1,6 @@
 package config.global.villager;
 
+import config.AntiFarmConfigurations;
 import config.global.villager.golem.PreventGolemSpawningConfig;
 import config.global.villager.infection.PreventVillagersInfectionConfig;
 import config.global.villager.zombie.PreventZombieVillagersCureConfig;
@@ -7,6 +8,10 @@ import fr.bramsou.yaml.api.configuration.dynamic.ConfigurationPart;
 import fr.bramsou.yaml.api.configuration.dynamic.annotation.ConfigurationPath;
 
 public class VillagerSettingsConfig extends ConfigurationPart {
+
+    public static VillagerSettingsConfig getInstance() {
+        return AntiFarmConfigurations.GLOBAL.getVillagerSettings();
+    }
 
     @ConfigurationPath(value = "prevent-villagers-profession-change", comments = "Once the villager gets a profession it prevents it from being changed.")
     private boolean preventVillagersProfessionChange = true;

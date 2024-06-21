@@ -10,11 +10,14 @@ import config.global.mobspawner.MobSpawnerSettingsConfig;
 import config.global.raidfarms.PreventRaidFarmsConfig;
 import config.global.settings.SettingsConfig;
 import config.global.villager.VillagerSettingsConfig;
-import fr.bramsou.yaml.api.configuration.dynamic.ConfigurationPart;
 import fr.bramsou.yaml.api.configuration.dynamic.annotation.ConfigurationPath;
+import org.bukkit.Material;
+import util.TypeUtil;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 public class GlobalConfig extends AbstractConfig {
 
@@ -45,8 +48,46 @@ public class GlobalConfig extends AbstractConfig {
     @ConfigurationPath(value = "creature-product-limiter", comments = "Creature item output limit. Production range in which mobs must be fed.")
     private CreatureProductLimiterConfig creatureProductLimiter = new CreatureProductLimiterConfig();
 
+    private final Set<Material> farmBlocks = EnumSet.noneOf(Material.class);
+    private final Set<Material> farmlandBlocks = EnumSet.noneOf(Material.class);
+
+    public SettingsConfig getSettings() {
+        return settings;
+    }
+
+    public AntiFishingConfig getAntiFishing() {
+        return antiFishing;
+    }
+
+    public MobSpawnerSettingsConfig getMobSpawnerSettings() {
+        return mobSpawnerSettings;
+    }
+
+    public VillagerSettingsConfig getVillagerSettings() {
+        return villagerSettings;
+    }
+
+    public FarmsSettingsConfig getFarmsSettings() {
+        return farmsSettings;
+    }
+
+    public AntiDispenserConfig getAntiDispenser() {
+        return antiDispenser;
+    }
+
+    public PreventMobFarmsConfig getPreventMobFarms() {
+        return preventMobFarms;
+    }
+
+    public PreventRaidFarmsConfig getPreventRaidFarms() {
+        return preventRaidFarms;
+    }
+
+    public CreatureProductLimiterConfig getCreatureProductLimiter() {
+        return creatureProductLimiter;
+    }
     @ConfigurationPath(value = "farmland-blocks", comments = "List of blocks on which any farm block can be grown.")
-    private List<String> farmlandBlocks = new ArrayList<>(List.of(
+    private List<String> farmlandBlockList = new ArrayList<>(List.of(
             "GRASS_BLOCK",
             "DIRT",
             "COARSE_DIRT",
@@ -58,9 +99,8 @@ public class GlobalConfig extends AbstractConfig {
             "END_STONE",
             "STONE"
     ));
-
     @ConfigurationPath(value = "farm-blocks", comments = "List of all things that can be farmed.")
-    private List<String> farmBlocks = new ArrayList<>(List.of(
+    private List<String> farmBlockList = new ArrayList<>(List.of(
             "CACTUS",
             "SUGAR_CANE",
             "SUGAR_CANE_BLOCK",
@@ -112,48 +152,24 @@ public class GlobalConfig extends AbstractConfig {
             "MANGROVE_LEAVES"
     ));
 
-    public SettingsConfig getSettings() {
-        return settings;
-    }
-
-    public AntiFishingConfig getAntiFishing() {
-        return antiFishing;
-    }
-
-    public MobSpawnerSettingsConfig getMobSpawnerSettings() {
-        return mobSpawnerSettings;
-    }
-
-    public VillagerSettingsConfig getVillagerSettings() {
-        return villagerSettings;
-    }
-
-    public FarmsSettingsConfig getFarmsSettings() {
-        return farmsSettings;
-    }
-
-    public AntiDispenserConfig getAntiDispenser() {
-        return antiDispenser;
-    }
-
-    public PreventMobFarmsConfig getPreventMobFarms() {
-        return preventMobFarms;
-    }
-
-    public PreventRaidFarmsConfig getPreventRaidFarms() {
-        return preventRaidFarms;
-    }
-
-    public CreatureProductLimiterConfig getCreatureProductLimiter() {
-        return creatureProductLimiter;
-    }
-
-    public List<String> getFarmlandBlocks() {
+    public Set<Material> getFarmlandBlocks() {
         return farmlandBlocks;
     }
 
-    public List<String> getFarmBlocks() {
+    public Set<Material> getFarmBlocks() {
         return farmBlocks;
+    }
+
+    @Override
+    public void loaded() {
+        this.farmBlocks.clear();
+        this.farmlandBlocks.clear();
+        for (String s : this.farmBlockList) {
+            TypeUtil.parseMaterial(s, this.farmBlocks::add);
+        }
+        for (String s : this.farmlandBlockList) {
+            TypeUtil.parseMaterial(s, this.farmlandBlocks::add);
+        }
     }
 
     @Override

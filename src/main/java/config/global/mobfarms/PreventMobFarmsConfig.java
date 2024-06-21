@@ -1,12 +1,18 @@
 package config.global.mobfarms;
 
+import config.AntiFarmConfigurations;
 import fr.bramsou.yaml.api.configuration.dynamic.ConfigurationPart;
 import fr.bramsou.yaml.api.configuration.dynamic.annotation.ConfigurationPath;
+import org.bukkit.entity.EntityType;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 public class PreventMobFarmsConfig extends ConfigurationPart {
+
+    private final Set<EntityType> mobs = EnumSet.noneOf(EntityType.class);
 
     @ConfigurationPath(value = "enable", comments = "Enable/Disable option.")
     private boolean enable = true;
@@ -34,6 +40,22 @@ public class PreventMobFarmsConfig extends ConfigurationPart {
             "BAT"
     ));
 
+    public static PreventMobFarmsConfig getInstance() {
+        return AntiFarmConfigurations.GLOBAL.getPreventMobFarms();
+    }
+
+    @Override
+    public void loaded() {
+        for (String s : this.moblist) {
+            try {
+                EntityType entityType = EntityType.valueOf(s);
+                this.mobs.add(entityType);
+            } catch (Exception e) {
+                throw new IllegalStateException(String.format("%s is not an existing entity type", s));
+            }
+        }
+    }
+
     public boolean isEnable() {
         return enable;
     }
@@ -58,7 +80,7 @@ public class PreventMobFarmsConfig extends ConfigurationPart {
         return blacklist;
     }
 
-    public List<String> getMoblist() {
-        return moblist;
+    public Set<EntityType> getMobs() {
+        return mobs;
     }
 }

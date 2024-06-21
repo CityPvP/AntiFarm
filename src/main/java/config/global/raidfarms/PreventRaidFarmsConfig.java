@@ -1,9 +1,14 @@
 package config.global.raidfarms;
 
+import config.AntiFarmConfigurations;
 import fr.bramsou.yaml.api.configuration.dynamic.ConfigurationPart;
 import fr.bramsou.yaml.api.configuration.dynamic.annotation.ConfigurationPath;
 
 public class PreventRaidFarmsConfig extends ConfigurationPart {
+
+    public static PreventRaidFarmsConfig getInstance() {
+        return AntiFarmConfigurations.GLOBAL.getPreventRaidFarms();
+    }
 
     @ConfigurationPath(value = "enable", comments = "Enable/Disable option.")
     private boolean enable = true;

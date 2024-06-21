@@ -1,36 +1,25 @@
 package antifarm;
 
+import config.global.settings.SettingsConfig;
+import config.global.villager.VillagerSettingsConfig;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-import org.bukkit.event.entity.EntityBreedEvent;
-import org.bukkit.event.entity.EntityDropItemEvent;
-import org.bukkit.event.entity.EntityEnterLoveModeEvent;
-import org.bukkit.event.entity.EntityPickupItemEvent;
-
-import configuration.Configuration;
-import core.AntiFarmPlugin;
 
 public class AntiVillagerBreed implements Listener {
-
-	private final Configuration config;
-
-	public AntiVillagerBreed(AntiFarmPlugin plugin) {
-		this.config = plugin.getConfig();
-	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onVillagerPickup(EntityPickupItemEvent event) {
 
-		if (config.getStringList("settings.disabled-worlds").contains(event.getEntity().getWorld().getName())) return;
+		if (SettingsConfig.getInstance().getDisabledWorlds().contains(event.getEntity().getWorld())) return;
 
 		if (event.isCancelled() || event.getEntity() == null) return;
 		if (!event.getEntity().getType().equals(EntityType.VILLAGER)) return;
-		if (!config.getBoolean("villager-settings.prevent-villagers-breed", true)) return;
+		if (!VillagerSettingsConfig.getInstance().isPreventVillagersBreed()) return;
 
 		Villager villager = (Villager) event.getEntity();
 		villager.setBreed(false);
@@ -40,11 +29,11 @@ public class AntiVillagerBreed implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onVillagerDrop(EntityDropItemEvent event) {
 
-		if (config.getStringList("settings.disabled-worlds").contains(event.getEntity().getWorld().getName())) return;
+		if (SettingsConfig.getInstance().getDisabledWorlds().contains(event.getEntity().getWorld())) return;
 
 		if (event.isCancelled() || event.getEntity() == null) return;
 		if (!event.getEntity().getType().equals(EntityType.VILLAGER)) return;
-		if (!config.getBoolean("villager-settings.prevent-villagers-breed", true)) return;
+		if (!VillagerSettingsConfig.getInstance().isPreventVillagersBreed()) return;
 
 		Villager villager = (Villager) event.getEntity();
 		villager.setBreed(false);
@@ -54,12 +43,12 @@ public class AntiVillagerBreed implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onVillagerBreed(EntityBreedEvent event) {
 
-		if (config.getStringList("settings.disabled-worlds").contains(event.getEntity().getWorld().getName())) return;
+		if (SettingsConfig.getInstance().getDisabledWorlds().contains(event.getEntity().getWorld())) return;
 
 		if (event.isCancelled() || event.getEntity() == null) return;
 		if (!event.getEntity().getType().equals(EntityType.VILLAGER)) return;
 		if (event.getMother() == null || event.getFather() == null) return;
-		if (!config.getBoolean("villager-settings.prevent-villagers-breed", true)) return;
+		if (!VillagerSettingsConfig.getInstance().isPreventVillagersBreed()) return;
 
 		event.setCancelled(true);
 
@@ -74,12 +63,12 @@ public class AntiVillagerBreed implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onVillagerSpawn(CreatureSpawnEvent event) {
 
-		if (config.getStringList("settings.disabled-worlds").contains(event.getEntity().getWorld().getName())) return;
+		if (SettingsConfig.getInstance().getDisabledWorlds().contains(event.getEntity().getWorld())) return;
 
 		if (event.isCancelled() || event.getEntity() == null) return;
 		if (!event.getEntity().getType().equals(EntityType.VILLAGER)) return;
 		if (!event.getSpawnReason().equals(SpawnReason.BREEDING)) return;
-		if (!config.getBoolean("villager-settings.prevent-villagers-breed", true)) return;
+		if (!VillagerSettingsConfig.getInstance().isPreventVillagersBreed()) return;
 
 		event.setCancelled(true);
 
@@ -88,9 +77,10 @@ public class AntiVillagerBreed implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onEntityEnterLoveMode(EntityEnterLoveModeEvent event) {
 
-		if (config.getStringList("settings.disabled-worlds").contains(event.getEntity().getWorld().getName())) return;
+		if (SettingsConfig.getInstance().getDisabledWorlds().contains(event.getEntity().getWorld())) return;
 
-		if (event.isCancelled() || event.getEntity() == null || !config.getBoolean("villager-settings.prevent-villagers-breed", true) || !event.getEntity().getType().equals(EntityType.VILLAGER)) return;
+		if (event.isCancelled() || !VillagerSettingsConfig.getInstance().isPreventVillagersBreed() || !event.getEntity().getType().equals(EntityType.VILLAGER))
+			return;
 
 		Villager villager = (Villager) event.getEntity();
 		villager.setBreed(false);

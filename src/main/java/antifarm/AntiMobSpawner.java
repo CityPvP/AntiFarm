@@ -1,7 +1,10 @@
 package antifarm;
 
-import java.util.Random;
-
+import config.global.mobspawner.MobSpawnerSettingsConfig;
+import config.global.settings.SettingsConfig;
+import config.spawners.SpawnerEntryConfig;
+import config.spawners.SpawnersConfig;
+import core.AntiFarmPlugin;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.CreatureSpawner;
@@ -13,21 +16,16 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import configuration.Configuration;
-import core.AntiFarmPlugin;
+import java.util.Random;
 
 
 public class AntiMobSpawner implements Listener {
 
 	private final AntiFarmPlugin plugin;
-	private final Configuration config;
-	private final Configuration spawners;
 	Random random = new Random();
 
 	public AntiMobSpawner(AntiFarmPlugin plugin) {
 		this.plugin = plugin;
-		this.config = plugin.getConfig();
-		this.spawners = plugin.getSpawners();
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -35,19 +33,21 @@ public class AntiMobSpawner implements Listener {
 
 		if (event.isCancelled() || event.getSpawner() == null) return;
 
-		if (config.getStringList("settings.disabled-worlds").contains(event.getSpawner().getWorld().getName())) return;
+		if (SettingsConfig.getInstance().getDisabledWorlds().contains(event.getSpawner().getWorld())) return;
 
-		if (config.getBoolean("mob-spawner-settings.prevent-spawn", true)) {
+		if (MobSpawnerSettingsConfig.getInstance().isPreventSpawn()) {
 			event.setCancelled(true);
 			return;
 		}
 
-		if (!config.getBoolean("mob-spawner-settings.spawner-data", false)) return;
+		if (!MobSpawnerSettingsConfig.getInstance().isSpawnerData()) return;
 
 		CreatureSpawner spawner = event.getSpawner();
-		String spawnerType = spawner.getSpawnedType().toString().toLowerCase();
+		String spawnerType = spawner.getSpawnedType().toString();
 
-		if (spawners.get("spawners." + spawnerType) == null) return;
+		final SpawnerEntryConfig config = SpawnersConfig.getSpawner(spawnerType);
+
+		if (config == null) return;
 
 		String world = event.getSpawner().getWorld().getName();
 
@@ -60,24 +60,24 @@ public class AntiMobSpawner implements Listener {
 		int y = location.getBlockY();
 		int z = location.getBlockZ();
 
-		boolean match = true;
+		boolean match = spawner.getMaxNearbyEntities() == config.getMaxNearbyEntities();
 
-		if (spawner.getMaxNearbyEntities() != spawners.getInt("spawners." + spawnerType + ".maxNearbyEntities")) match = false;
-		if (spawner.getMaxSpawnDelay() != spawners.getInt("spawners." + spawnerType + ".maxSpawnDelay")) match = false;
-		if (spawner.getMinSpawnDelay() != spawners.getInt("spawners." + spawnerType + ".minSpawnDelay")) match = false;
-		if (spawner.getRequiredPlayerRange() != spawners.getInt("spawners." + spawnerType + ".requiredPlayerRange")) match = false;
-		if (spawner.getSpawnCount() != spawners.getInt("spawners." + spawnerType + ".spawnCount")) match = false;
-		if (spawner.getSpawnRange() != spawners.getInt("spawners." + spawnerType + ".spawnRange")) match = false;
+
+        if (spawner.getMaxSpawnDelay() != config.getMaxSpawnDelay()) match = false;
+		if (spawner.getMinSpawnDelay() != config.getMinSpawnDelay()) match = false;
+		if (spawner.getRequiredPlayerRange() != config.getRequiredPlayerRange()) match = false;
+		if (spawner.getSpawnCount() != config.getSpawnCount()) match = false;
+		if (spawner.getSpawnRange() != config.getSpawnRange()) match = false;
 
 		if (match) return;
 
-		int maxNearbyEntities = spawners.getInt("spawners." + spawnerType + ".maxNearbyEntities", spawner.getMaxNearbyEntities());
-		int maxSpawnDelay = spawners.getInt("spawners." + spawnerType + ".maxSpawnDelay", spawner.getMaxSpawnDelay());
-		int minSpawnDelay = spawners.getInt("spawners." + spawnerType + ".minSpawnDelay", spawner.getMinSpawnDelay());
-		int requiredPlayerRange = spawners.getInt("spawners." + spawnerType + ".requiredPlayerRange", spawner.getRequiredPlayerRange());
-		int spawnCount = spawners.getInt("spawners." + spawnerType + ".spawnCount", spawner.getSpawnCount());
-		int spawnRange = spawners.getInt("spawners." + spawnerType + ".spawnRange", spawner.getSpawnRange());
-		int delay = random.nextInt(maxSpawnDelay-minSpawnDelay) + minSpawnDelay;
+		int maxNearbyEntities = config.getMaxNearbyEntities();
+		int maxSpawnDelay = config.getMaxSpawnDelay();
+		int minSpawnDelay = config.getMinSpawnDelay();
+		int requiredPlayerRange = config.getRequiredPlayerRange();
+		int spawnCount = config.getSpawnCount();
+		int spawnRange = config.getSpawnRange();
+		int delay = random.nextInt(maxSpawnDelay - minSpawnDelay) + minSpawnDelay;
 
 		String nbt = "SpawnData:{entity:{id:" + spawnerType + "}}" + ",MaxNearbyEntities:" + maxNearbyEntities + ",MaxSpawnDelay:" + maxSpawnDelay + ",MinSpawnDelay:" + minSpawnDelay + ",RequiredPlayerRange:" + requiredPlayerRange + ",SpawnCount:" + spawnCount + ",SpawnRange:" + spawnRange + ",Delay:" + delay;
 
@@ -89,20 +89,20 @@ public class AntiMobSpawner implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onBlockBreak(BlockBreakEvent event) {
 
-		if (config.getStringList("settings.disabled-worlds").contains(event.getBlock().getWorld().getName())) return;
+		if (SettingsConfig.getInstance().getDisabledWorlds().contains(event.getBlock().getWorld())) return;
 
-		if (event.isCancelled() || event.getPlayer() == null || event.getBlock() == null) return;
+		if (event.isCancelled()) return;
 		if (!event.getBlock().getType().equals(Material.SPAWNER)) return;
-		if (!config.getBoolean("mob-spawner-settings.prevent-break", true)) return;
+		if (!MobSpawnerSettingsConfig.getInstance().isPreventBreak()) return;
 
 		if (event.getPlayer().hasPermission("antifarm.admin") || event.getPlayer().isOp()) {
 			if (!event.getPlayer().isSneaking()) {
 				event.setCancelled(true);
-				event.getPlayer().sendMessage(config.getString("settings.prefix").replaceAll("&", "§") + config.getString("mob-spawner-settings.admin-warn-message").replaceAll("&", "§"));
+				event.getPlayer().sendMessage(SettingsConfig.getInstance().getPrefix() + MobSpawnerSettingsConfig.getInstance().getAdminWarnMessage());
 			}
 		} else {
 			event.setCancelled(true);
-			event.getPlayer().sendMessage(config.getString("settings.prefix").replaceAll("&", "§") + config.getString("mob-spawner-settings.player-warn-message").replaceAll("&", "§"));
+			event.getPlayer().sendMessage(SettingsConfig.getInstance().getPrefix() + MobSpawnerSettingsConfig.getInstance().getPlayerWarnMessage());
 		}
 
 	}
@@ -110,16 +110,17 @@ public class AntiMobSpawner implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onRightClick(PlayerInteractEvent event) {
 
-		if (config.getStringList("settings.disabled-worlds").contains(event.getPlayer().getWorld().getName())) return;
+		if (SettingsConfig.getInstance().getDisabledWorlds().contains(event.getPlayer().getWorld())) return;
 
-		if (event.getItem() == null || event.getPlayer() == null || event.getClickedBlock() == null || event.getAction() == null) return;
+		if (event.getItem() == null || event.getClickedBlock() == null)
+			return;
 		if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
 		if (!event.getClickedBlock().getType().equals(Material.SPAWNER)) return;
 		if (!event.getItem().getType().toString().contains("SPAWN_EGG")) return;
-		if (!config.getBoolean("mob-spawner-settings.prevent-transformation", true)) return;
+		if (!MobSpawnerSettingsConfig.getInstance().isPreventTransformation()) return;
 
 		event.setCancelled(true);
-		event.getPlayer().sendMessage(config.getString("settings.prefix").replaceAll("&", "§") + config.getString("mob-spawner-settings.transformation-warn-message").replaceAll("&", "§"));
+		event.getPlayer().sendMessage(SettingsConfig.getInstance().getPrefix() + MobSpawnerSettingsConfig.getInstance().getTransformationWarnMessage());
 
 	}
 

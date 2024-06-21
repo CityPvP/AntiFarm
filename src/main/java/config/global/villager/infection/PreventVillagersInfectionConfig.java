@@ -1,9 +1,14 @@
 package config.global.villager.infection;
 
+import config.global.villager.VillagerSettingsConfig;
 import fr.bramsou.yaml.api.configuration.dynamic.ConfigurationPart;
 import fr.bramsou.yaml.api.configuration.dynamic.annotation.ConfigurationPath;
 
 public class PreventVillagersInfectionConfig extends ConfigurationPart {
+
+    public static PreventVillagersInfectionConfig getInstance() {
+        return VillagerSettingsConfig.getInstance().getPreventVillagersInfection();
+    }
 
     @ConfigurationPath(value = "enable", comments = "Enable/Disable option.")
     private boolean enable = true;
