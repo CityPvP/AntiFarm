@@ -174,6 +174,6 @@ public class GlobalConfig extends AbstractConfig {
 
     @Override
     public String name() {
-        return "global";
+        return "config";
     }
 }
