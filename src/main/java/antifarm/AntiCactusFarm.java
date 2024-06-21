@@ -44,7 +44,8 @@ public class AntiCactusFarm implements Listener {
 		Collections.addAll(domeBlocks, block, block.getRelative(BlockFace.UP), block.getRelative(BlockFace.NORTH), block.getRelative(BlockFace.SOUTH), block.getRelative(BlockFace.EAST), block.getRelative(BlockFace.WEST));
 
 		for (Block dBlock : domeBlocks) {
-			if (!(dBlock.getType().equals(Material.CACTUS)) && !(dBlock.getType().equals(Material.AIR)) && !(dBlock.getType().equals(Material.CAVE_AIR))) {
+			final Material dBlockType = dBlock.getType();
+			if (!(dBlockType.equals(Material.CACTUS)) && !(dBlockType.equals(Material.AIR)) && !(dBlockType.equals(Material.CAVE_AIR))) {
 
 				event.setCancelled(true);
 
@@ -52,8 +53,9 @@ public class AntiCactusFarm implements Listener {
 					for (int i = 0; i < 4; i++) {
 
 						Block replace = block.getWorld().getBlockAt(bLoc.getBlockX(), bLoc.getBlockY() - i, bLoc.getBlockZ());
+						final Material replaceBlockType = replace.getType();
 
-						if (replace.getType().equals(Material.CACTUS) || replace.getType().equals(Material.SAND)) {
+						if (replaceBlockType.equals(Material.CACTUS) || replaceBlockType.equals(Material.SAND)) {
 							Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
 								replace.breakNaturally();
 								replace.setType(Material.AIR);
@@ -63,40 +65,6 @@ public class AntiCactusFarm implements Listener {
 				}
 
 				break;
-			}
-		}
-
-	}
-
-	@EventHandler(priority = EventPriority.HIGHEST)
-	private void onBlockPhysics(BlockPhysicsEvent event) {
-
-		if (SettingsConfig.getInstance().getDisabledWorlds().contains(event.getBlock().getWorld())) return;
-
-		if (event.isCancelled() || event.getBlock() == null || event.getSourceBlock() == null) return;
-		if (!event.getSourceBlock().getType().equals(Material.SAND) || event.getSourceBlock().getType().equals(Material.RED_SAND) || event.getSourceBlock().getType().toString().contains("CONCRETE_POWDER") || event.getSourceBlock().getType().equals(Material.DRAGON_EGG))
-			return;
-		if (!event.getBlock().getType().equals(Material.CACTUS)) return;
-		if (!FarmsSettingsConfig.getInstance().isPreventCactusFarms()) return;
-
-		event.setCancelled(true);
-		event.getSourceBlock().breakNaturally();
-		event.getSourceBlock().setType(Material.AIR);
-
-		if (!SettingsConfig.getInstance().isBreakBlocks()) return;
-
-		Block block = event.getBlock();
-		Location bLoc = block.getLocation();
-
-		for (int i = 0; i < 4; i++) {
-
-			Block replace = block.getWorld().getBlockAt(bLoc.getBlockX(), bLoc.getBlockY() - i, bLoc.getBlockZ());
-
-			if (replace.getType().equals(Material.CACTUS) || replace.getType().equals(Material.SAND)) {
-				Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
-					replace.breakNaturally();
-					replace.setType(Material.AIR);
-				}, 1);
 			}
 		}
 

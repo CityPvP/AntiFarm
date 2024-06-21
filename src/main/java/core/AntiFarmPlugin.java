@@ -28,9 +28,9 @@ public class AntiFarmPlugin extends JavaPlugin implements Listener {
 				new AntiEndermanFarm(), new AntiVillagerBreed(), new AntiMobFarm(this), new AntiLightlessFarm(),
 				new AntiDispenser(), new AntiFishFarm(), new AntiWaterlessFarm(), new AntiMobSpawner(this),
 				new AntiVillagerTransform(), new AntiVillagerTarget(), new AntiVillageGuard(), new AntiSnowballFarm(),
-				new AntiRaidFarm(), new AntiBerryFarm(), new AntiZeroTickFarm(),
+				new AntiRaidFarm(), new AntiBerryFarm(), new AntiZeroTickFarm(), new AntiBlockPhysics(this),
 				new AntiFroglightFarm(this), new AntiVillagerCareer(), new AntiVillagerTrade(), new AntiStringDupe(),
-				new AntiChickenEggFarm(this), new AntiCowMilk(this), new AntiDripstoneFarm(), new AntiLavaFarm(this));
+				new AntiChickenEggFarm(this), new AntiCowMilk(this), new AntiLavaFarm(this));
 
 		getCommand("antifarm").setExecutor(new Commands(this));
 

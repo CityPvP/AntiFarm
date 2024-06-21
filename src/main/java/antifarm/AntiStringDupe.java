@@ -35,27 +35,15 @@ public class AntiStringDupe implements Listener {
 
 		if (SettingsConfig.getInstance().getDisabledWorlds().contains(event.getBlock().getWorld())) return;
 
+
 		if (event.getBlock() == null || event.getToBlock() == null) return;
-		if (!event.getBlock().getType().equals(Material.WATER) && !event.getBlock().getType().equals(Material.LAVA) && !event.getBlock().getType().toString().contains("TRAPDOOR") || !event.getToBlock().getType().equals(Material.TRIPWIRE))
+		final Material blockType = event.getBlock().getType();
+		if (!blockType.equals(Material.WATER) && !blockType.equals(Material.LAVA) && !blockType.toString().contains("TRAPDOOR") || !event.getToBlock().getType().equals(Material.TRIPWIRE))
 			return;
 		if (!FarmsSettingsConfig.getInstance().isPreventStringDupe()) return;
 
 		event.setCancelled(true);
 		event.getToBlock().setType(Material.AIR);
-
-	}
-
-	@EventHandler(priority = EventPriority.HIGHEST)
-	private void onBlockPhysics(BlockPhysicsEvent event) {
-		if (SettingsConfig.getInstance().getDisabledWorlds().contains(event.getBlock().getWorld())) return;
-
-		if (event.isCancelled()) return;
-		if (!event.getSourceBlock().getType().equals(Material.WATER) && !event.getSourceBlock().getType().equals(Material.LAVA) && !event.getSourceBlock().getType().toString().contains("TRAPDOOR") || !event.getBlock().getType().equals(Material.TRIPWIRE))
-			return;
-		if (!FarmsSettingsConfig.getInstance().isPreventStringDupe()) return;
-
-		event.setCancelled(true);
-		event.getBlock().setType(Material.AIR);
 
 	}
 
