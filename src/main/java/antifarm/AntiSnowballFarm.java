@@ -17,7 +17,7 @@ public class AntiSnowballFarm implements Listener {
 		if (SettingsConfig.getInstance().getDisabledWorlds().contains(event.getBlock().getWorld())) return;
 
 		if (event.isCancelled() || event.getEntity() == null) return;
-		if (!event.getEntity().getType().equals(EntityType.SNOWMAN)) return;
+		if (!event.getEntity().getType().equals(EntityType.SNOW_GOLEM)) return;
 		if (!event.getNewState().getType().equals(Material.SNOW)) return;
 		if (!FarmsSettingsConfig.getInstance().isPreventSnowballFarms()) return;
 

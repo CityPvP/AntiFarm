@@ -46,7 +46,7 @@ public class AntiMobFarm implements Listener {
 			return;
 
 		double damageTaken = event.getEntity().getPersistentDataContainer().getOrDefault(new NamespacedKey(plugin, "damageTaken"), PersistentDataType.DOUBLE, 0.0);
-		double maxHealth = event.getEntity().getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
+		double maxHealth = event.getEntity().getAttribute(Attribute.MAX_HEALTH).getValue();
 		double damagePercentage = PreventMobFarmsConfig.getInstance().getRequiredDamagePercentForLoot() / 100D;
 		if ((maxHealth * damagePercentage) <= damageTaken) return;
 
